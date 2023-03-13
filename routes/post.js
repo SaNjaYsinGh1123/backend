@@ -11,7 +11,7 @@ router.post('/create',async(req,res)=>{
     try {
         
         const result = await cloudinary.uploader.upload(image,{
-            folder: postPic
+            folder: post
         })
         const newPost = new Post({
             title,
