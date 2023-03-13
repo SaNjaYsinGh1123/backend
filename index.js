@@ -8,6 +8,8 @@ app.use(express.json());
 
 app.use(cors());
 
+app.use(express.urlencoded());
+
 app.use("/images", express.static(path.join(__dirname,'/images')));
 
 const storage = multer.diskStorage({
@@ -18,6 +20,7 @@ const storage = multer.diskStorage({
         callback(null, file.originalname)
     },
 })
+
 
 const upload = multer({storage: storage});
 
