@@ -6,6 +6,7 @@ const Post = require('../models/post');
 const bcrypt = require('bcrypt');
 
 
+
 // for signup
 router.post('/register',async (req,res)=>{
    try{
@@ -14,7 +15,8 @@ router.post('/register',async (req,res)=>{
     const newUser = new User({
         username: req.body.username,
         password: hashedPass,
-        email: req.body.email        
+        email: req.body.email 
+            
     });
 
     const user = await newUser.save();

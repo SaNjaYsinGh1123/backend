@@ -3,20 +3,33 @@ const express = require('express');
 const router = express.Router();
 
 const Post =  require('../models/post');
+const cloudinary = require('../config/cloudinary');
 
 //create
 router.post('/create',async(req,res)=>{
-
-    const newPost = new Post(req.body);
+    const  {title, desc , image, username,categories} = req.body;   
     try {
-        const post =  await newPost.save();
-
-        res.status(200).json(post);
-    
-    } 
-    catch (error) {
-        res.status(500).json(error);       
-    }
+        
+        const result = await cloudinary.uploader.upload(image,{
+            folder: postPic
+        })
+        const newPost = new Post({
+            title,
+            desc,
+            image:{
+                public_id: result.public_id,
+                url: result.secure_url
+            },
+            username,
+            categories
+        });
+            const post =  await newPost.save();
+            res.status(200).json(post);
+        
+        } 
+        catch (error) {
+            res.status(500).json(error);       
+        }
 
 });
 
