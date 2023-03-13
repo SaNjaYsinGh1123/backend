@@ -11,9 +11,9 @@ router.post('/create',async(req,res)=>{
     try {
         
         const result = await cloudinary.uploader.upload(image,{
-            folder: post
+            folder: "post"
         })
-        const newPost = new Post({
+        const newPost = await Post.create({
             title,
             desc,
             image:{
@@ -23,8 +23,8 @@ router.post('/create',async(req,res)=>{
             username,
             categories
         });
-            const post =  await newPost.save();
-            res.status(200).json(post);
+            // const post =  await newPost.save();
+            res.status(200).json(newPost);
         
         } 
         catch (error) {
