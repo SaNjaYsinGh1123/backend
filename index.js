@@ -2,14 +2,16 @@ const express = require('express');
 const app = express();
 const db = require('./config/mongoose');
 const path = require('path');
-const multer = require('multer');
+// const multer = require('multer');
 const cors = require('cors');
 const  bodyParser = require('body-parser');
 const fileupload = require('express-fileupload');
+const singleUpload = require('./config/multer');
+
 app.use(express.json());
 
 
-// app.use(express.urlencoded());
+app.use(express.urlencoded());
 app.use(bodyParser.json({limit: '100mb'}));
 app.use(bodyParser.urlencoded({
     limit: '100mb',

@@ -16,8 +16,16 @@ const UserSchema = new mongoose.Schema({
         require:true,
         },
    profilePicture: {
+        public_id:{
+            type:String,
+            required:false,
+            default: '',
+        },
+        url:{
         type:String,
-        default: "",
+        required:false,
+        default:''
+      }
         },
     },{
         timestamps:true

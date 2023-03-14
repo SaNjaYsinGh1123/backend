@@ -4,20 +4,31 @@ const router = express.Router();
 const User = require('../models/user');
 const Post = require('../models/post');
 const bcrypt = require('bcrypt');
-
-
+const cloudinary = require('../config/cloudinary');
+const singleUpload = require('../config/multer');
+const getDataUri = require('../config/dataUri');
 
 // for signup
-router.post('/register',async (req,res)=>{
+router.post('/register',singleUpload.single('profilePicture'),async (req,res)=>{
    try{
-    const salt = await bcrypt.genSalt(10);
-    const hashedPass = await bcrypt.hash(req.body.password,salt);   
-    const newUser = new User({
-        username: req.body.username,
-        password: hashedPass,
-        email: req.body.email 
-            
-    });
+       const salt = await bcrypt.genSalt(10);
+       const hashedPass = await bcrypt.hash(req.body.password,salt);   
+        const data = {
+            username: req.body.username,
+            password: hashedPass,
+            email: req.body.email 
+            }
+
+        if(req.body.profilePicture !== '')
+        {  const fileUri = getDataUri(req.file);
+           const userpic =  await cloudinary.uploader.upload(fileUri.content);
+
+            data.profilePicture = {
+                public_id: userpic.public_id,
+                url: userpic.secure_url
+            }
+        }
+       const newUser = new User(data);
 
     const user = await newUser.save();
     
@@ -46,12 +57,12 @@ router.post('/login',async (req,res)=>{
     try {
       const user = await User.findOne({username:req.body.username})
       
-      console.log('user',user);
-      console.log('user._doc',user._doc);
+    //   console.log('user',user);
+    //   console.log('user._doc',user._doc);
       //if no user
        !user && res.status(400).json("user is not found");
       
-       const isvalid = await bcrypt.compare(req.body.password,user.password);
+       const isvalid = bcrypt.compare(req.body.password,user.password);
        
        
        //if user and password didnot match
@@ -100,42 +111,59 @@ router.post('/login',async (req,res)=>{
 //     }
 // })
 
-router.put('/:id', async(req,res)=>{
+router.put('/:id',singleUpload.single('profilePicture'), async(req,res)=>{
+    // console.log("req.body.userId",req.body.userId);
+    // console.log("req.body",req.params.id);
     if(req.body.userId === req.params.id)
     {
-        if(req.body.password){
+        // if(req.body.password){
 
-            const salt = await bcrypt.genSalt(10);
-           req.body.password = await bcrypt.hashSync(req.body.password,salt);
-        }
+        //     const salt = await bcrypt.genSalt(10);
+        //    req.body.password = bcrypt.hashSync(req.body.password,salt);
+        // }
     
-    try {
-  
-    const updatedUser = await  User.findByIdAndUpdate(req.params.id,
-        {
-            $set: req.body
-        },
-        {
-            new:true
-        }
-        );
-      
-        res.status(200).json(updatedUser);    
-     } catch (error) {
-         res.status(500).json(error);  
-    }
-}else{
-    res.status(401).json('you can updated your account ')
-}
-  });
+     try {  
+        const currentuser = await User.findById(req.params.id);
+            const data = {
+                username: req.body.username,
+                email: req.body.email 
+            }
 
-router.delete('/:id',async(req,res)=>{
+            if(req.body.profilePicture !== '')
+            {  
+                console.log('current',currentuser.profilePicture);
+                const ImgId = currentuser.profilePicture.public_id;
+                await cloudinary.uploader.destroy(ImgId);
+                const fileUri = getDataUri(req.file);
+                const userpic =  await cloudinary.uploader.upload(fileUri.content);
+
+                data.profilePicture = {
+                    public_id: userpic.public_id,
+                    url: userpic.secure_url
+                }
+            }
+            const updatedUser = await  User.findByIdAndUpdate(req.params.id,data)      
+            res.status(200).json(updatedUser);    
+        } catch (error) {
+            console.log(error);
+            res.status(500).json(error);  
+        }
+    }else{
+        res.status(401).json('you can updated your account only')
+    }
+});
+
+router.delete('/:id',singleUpload.single('profilePicture'),async(req,res)=>{
+    // console.log("req.body.userId",req.body.userId);
+    // console.log("req.params",req.params.id);
+    // console.log("req.body",req.body);
     if(req.body.userId === req.params.id)
     {
         try {
             const user = await User.findById(req.params.id);
             try {
-    
+                // console.log(user.profilePicture);
+               await cloudinary.uploader.destroy(user.profilePicture.public_id)
                 await Post.deleteMany({username: user.username});
     
                 await User.findByIdAndDelete(req.params.id);
@@ -151,7 +179,7 @@ router.delete('/:id',async(req,res)=>{
 
     }
     else{
-        res.status(401).json('you can delete your account ');
+        res.status(401).json('you can delete your account only');
     }
     });
 
