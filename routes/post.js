@@ -70,7 +70,7 @@ router.put('/:id',singleUpload.single('image'),async(req,res)=>{
             }
             
             const updatedPost = await Post.findByIdAndUpdate(
-                        req.params.id,data)
+                        req.params.id,data,{new: true})
 
 
                 res.status(200).json(updatedPost);
