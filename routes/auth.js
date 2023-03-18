@@ -142,7 +142,7 @@ router.put('/:id',singleUpload.single('profilePicture'), async(req,res)=>{
                     url: userpic.secure_url
                 }
             }
-            const updatedUser = await  User.findByIdAndUpdate(req.params.id,data)      
+            const updatedUser = await User.findByIdAndUpdate(req.params.id,data);     
             res.status(200).json(updatedUser);    
         } catch (error) {
             console.log(error);
