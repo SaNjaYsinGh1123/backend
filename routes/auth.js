@@ -143,6 +143,7 @@ router.put('/:id',singleUpload.single('profilePicture'), async(req,res)=>{
                 }
             }
             const updatedUser = await User.findByIdAndUpdate(req.params.id,data,{new: true});     
+            await Post.updateMany({username: currentuser.username},{$set:{username:data.username}});
             res.status(200).json(updatedUser);    
         } catch (error) {
             console.log(error);
