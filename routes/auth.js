@@ -70,7 +70,7 @@ router.post('/login',async (req,res)=>{
        
        //if user and password match
        const {password, ...other} = user._doc;
-       res.status(200).json(other);
+       isvalid && user && res.status(200).json(other);
        
     }
     catch (error) {
