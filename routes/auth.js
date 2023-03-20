@@ -11,6 +11,13 @@ const getDataUri = require('../config/dataUri');
 // for signup
 router.post('/register',singleUpload.single('profilePicture'),async (req,res)=>{
    try{
+       const CheckUser = await User.findOne({username:req.body.username});
+       const CheckEmail = await User.findOne({email:req.body.email});
+       if(CheckUser){
+           res.status(401).json('this username is not allowed');
+        }else if(CheckEmail){
+            res.status(401).json('this email is not allowed');
+       }else{
        const salt = await bcrypt.genSalt(10);
        const hashedPass = await bcrypt.hash(req.body.password,salt);   
         const data = {
@@ -33,7 +40,7 @@ router.post('/register',singleUpload.single('profilePicture'),async (req,res)=>{
     const user = await newUser.save();
     
     res.status(200).json(user);
-    
+     }
 }catch(err){
     res.status(400).json(err);
    }   
