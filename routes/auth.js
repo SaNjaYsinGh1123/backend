@@ -138,9 +138,11 @@ router.put('/:id',singleUpload.single('profilePicture'), async(req,res)=>{
 
             if(req.body.profilePicture !== '')
             {  
-                console.log('current',currentuser.profilePicture);
                 const ImgId = currentuser.profilePicture.public_id;
-                await cloudinary.uploader.destroy(ImgId);
+                if(ImgId !== '')
+                {
+                  await cloudinary.uploader.destroy(ImgId);
+                }
                 const fileUri = getDataUri(req.file);
                 const userpic =  await cloudinary.uploader.upload(fileUri.content);
 
@@ -162,16 +164,16 @@ router.put('/:id',singleUpload.single('profilePicture'), async(req,res)=>{
 });
 
 router.delete('/:id',singleUpload.single('profilePicture'),async(req,res)=>{
-    // console.log("req.body.userId",req.body.userId);
-    // console.log("req.params",req.params.id);
-    // console.log("req.body",req.body);
+    
     if(req.body.userId === req.params.id)
     {
         try {
             const user = await User.findById(req.params.id);
             try {
-                // console.log(user.profilePicture);
-               await cloudinary.uploader.destroy(user.profilePicture.public_id)
+                if(user.profilePicture.public_id !== '')
+                {
+                  await cloudinary.uploader.destroy(user.profilePicture.public_id)
+                }
                 await Post.deleteMany({username: user.username});
     
                 await User.findByIdAndDelete(req.params.id);
