@@ -123,37 +123,39 @@ router.put('/:id',singleUpload.single('profilePicture'), async(req,res)=>{
     // console.log("req.body",req.params.id);
     if(req.body.userId === req.params.id)
     {
-        // if(req.body.password){
-
-        //     const salt = await bcrypt.genSalt(10);
-        //    req.body.password = bcrypt.hashSync(req.body.password,salt);
-        // }
-    
-     try {  
-        const currentuser = await User.findById(req.params.id);
-            const data = {
-                username: req.body.username,
-                email: req.body.email 
-            }
-
-            if(req.body.profilePicture !== '')
-            {  
-                const ImgId = currentuser.profilePicture.public_id;
-                if(ImgId !== '')
-                {
-                  await cloudinary.uploader.destroy(ImgId);
+    try {  
+        const CheckUser = await User.findOne({username:req.body.username});
+        const CheckEmail = await User.findOne({email:req.body.email});
+        if(CheckUser){
+            res.status(401).json('this username is not allowed');
+         }else if(CheckEmail){
+             res.status(401).json('this email is not allowed');
+        }else{
+            const currentuser = await User.findById(req.params.id);
+                const data = {
+                    username: req.body.username,
+                    email: req.body.email 
                 }
-                const fileUri = getDataUri(req.file);
-                const userpic =  await cloudinary.uploader.upload(fileUri.content);
 
-                data.profilePicture = {
-                    public_id: userpic.public_id,
-                    url: userpic.secure_url
+                if(req.body.profilePicture !== '')
+                {  
+                    const ImgId = currentuser.profilePicture.public_id;
+                    if(ImgId !== '')
+                    {
+                    await cloudinary.uploader.destroy(ImgId);
+                    }
+                    const fileUri = getDataUri(req.file);
+                    const userpic =  await cloudinary.uploader.upload(fileUri.content);
+
+                    data.profilePicture = {
+                        public_id: userpic.public_id,
+                        url: userpic.secure_url
+                    }
                 }
-            }
-            const updatedUser = await User.findByIdAndUpdate(req.params.id,data,{new: true});     
-            await Post.updateMany({username: currentuser.username},{$set:{username:data.username}});
-            res.status(200).json(updatedUser);    
+                const updatedUser = await User.findByIdAndUpdate(req.params.id,data,{new: true});     
+                await Post.updateMany({username: currentuser.username},{$set:{username:data.username}});
+                res.status(200).json(updatedUser);  
+            }  
         } catch (error) {
             console.log(error);
             res.status(500).json(error);  
