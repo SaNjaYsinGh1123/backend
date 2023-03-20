@@ -14,9 +14,9 @@ router.post('/register',singleUpload.single('profilePicture'),async (req,res)=>{
        const CheckUser = await User.findOne({username:req.body.username});
        const CheckEmail = await User.findOne({email:req.body.email});
        if(CheckUser){
-           res.status(400).json('this username is not allowed');
+           res.status(401).json('this username is not allowed');
         }else if(CheckEmail){
-            res.status(400).json('this email is not allowed');
+            res.status(401).json('this email is not allowed');
        }else{
        const salt = await bcrypt.genSalt(10);
        const hashedPass = await bcrypt.hash(req.body.password,salt);   
