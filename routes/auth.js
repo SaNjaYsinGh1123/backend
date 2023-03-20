@@ -127,9 +127,15 @@ router.put('/:id',singleUpload.single('profilePicture'), async(req,res)=>{
         const CheckUser = await User.findOne({username:req.body.username});
         const CheckEmail = await User.findOne({email:req.body.email});
         if(CheckUser){
-            res.status(401).json('this username is not allowed');
+            if(CheckUser.id !== req.params.id)
+            {
+                res.status(401).json('this username is not allowed');
+            }
          }else if(CheckEmail){
-             res.status(401).json('this email is not allowed');
+            if(CheckUser.id !== req.params.id)
+            {
+                res.status(401).json('this email is not allowed');
+            }
         }else{
             const currentuser = await User.findById(req.params.id);
                 const data = {
