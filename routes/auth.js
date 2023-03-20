@@ -124,19 +124,23 @@ router.put('/:id',singleUpload.single('profilePicture'), async(req,res)=>{
     if(req.body.userId === req.params.id)
     {
     try {  
-        const CheckUser = await User.findOne({username:req.body.username});
-        const CheckEmail = await User.findOne({email:req.body.email});
-        if(CheckUser){
-            if(CheckUser.id !== req.params.id)
+        const checkUser = await User.findOne({username:req.body.username});
+        const checkEmail = await User.findOne({email:req.body.email});
+        if(checkUser){
+           
+            if(checkUser.id !== req.params.id)
             {
-                res.status(401).json('this username is not allowed');
+               res.status(401).json('this username is not allowed');
             }
-         }else if(CheckEmail){
-            if(CheckUser.id !== req.params.id)
+
+         }
+         if(checkEmail){
+            if(checkEmail.id !== req.params.id)
             {
                 res.status(401).json('this email is not allowed');
             }
-        }else{
+        }
+
             const currentuser = await User.findById(req.params.id);
                 const data = {
                     username: req.body.username,
@@ -161,9 +165,8 @@ router.put('/:id',singleUpload.single('profilePicture'), async(req,res)=>{
                 const updatedUser = await User.findByIdAndUpdate(req.params.id,data,{new: true});     
                 await Post.updateMany({username: currentuser.username},{$set:{username:data.username}});
                 res.status(200).json(updatedUser);  
-            }  
+             
         } catch (error) {
-            console.log(error);
             res.status(500).json(error);  
         }
     }else{
